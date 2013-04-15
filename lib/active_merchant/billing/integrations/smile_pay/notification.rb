@@ -5,6 +5,8 @@ module ActiveMerchant #:nodoc:
     module Integrations #:nodoc:
       module SmilePay
         class Notification < ActiveMerchant::Billing::Integrations::Notification
+          attr_accessor :custom_user_confirmation_param #商家認證參數
+
           # TODO credit card
           def complete?
             # No status except for credit card
@@ -64,18 +66,17 @@ module ActiveMerchant #:nodoc:
 
           # SmilePay 沒有遠端驗證功能，
           # 而以認證碼代替
-          #   key: 商家認證參數
-          def acknowledge(key)
+          def acknowledge
             # TODO 使用查詢功能實作 acknowledge
-            params[:Mid_smilepay].to_i == calculated_mid_smile_key(key)
+            params[:Mid_smilepay].to_i == calculated_mid_smile_key
           end
 
           private
 
-          def calculated_mid_smile_key(key)
+          def calculated_mid_smile_key
             b = "%08d" % (gross().dollars).to_i
             c = params['Smseid'][-4..-1].gsub(/\D/,'9')
-            d = ( key + b + c ).chars.to_a
+            d = ( custom_user_confirmation_param() + b + c ).chars.to_a
 
             # 偶數位數字（從左算起）
             sum_even = d.values_at(* d.each_index.select(&:odd?)).compact.map(&:to_i).inject{|sum,x| sum + x }

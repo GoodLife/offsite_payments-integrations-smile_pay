@@ -5,6 +5,7 @@ class SmilePayNotificationTest < Test::Unit::TestCase
 
   def setup
     @smile_pay = SmilePay::Notification.new(http_raw_data)
+    @smile_pay.custom_user_confirmation_param = '1234'
   end
 
   def test_accessors
@@ -35,7 +36,7 @@ class SmilePayNotificationTest < Test::Unit::TestCase
   end
 
   def test_calculated_mid_smile_key
-    assert @smile_pay.send(:calculated_mid_smile_key, '1234'), '213'
+    assert @smile_pay.send(:calculated_mid_smile_key), '213'
   end
 
   private
