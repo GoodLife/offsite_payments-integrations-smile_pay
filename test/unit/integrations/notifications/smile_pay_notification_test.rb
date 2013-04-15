@@ -12,14 +12,14 @@ class SmilePayNotificationTest < Test::Unit::TestCase
     assert_equal "Completed", @smile_pay.status
     assert_equal "12_24_123", @smile_pay.transaction_id
     assert_equal "888", @smile_pay.item_id
-    assert_equal Money.new(532,'TWD'), @smile_pay.gross
+    assert_equal Money.new(532 * 100,'TWD'), @smile_pay.gross
     assert_equal "TWD", @smile_pay.currency
     assert_equal "20130310140000", @smile_pay.received_at
     assert @smile_pay.test?
   end
 
   def test_compositions
-    assert_equal Money.new(532, 'TWD'), @smile_pay.amount
+    assert_equal Money.new(532 * 100, 'TWD'), @smile_pay.amount
   end
 
   # Replace with real successful acknowledgement code

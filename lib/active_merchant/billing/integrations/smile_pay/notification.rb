@@ -12,11 +12,12 @@ module ActiveMerchant #:nodoc:
           end
 
           def item_id
-            # ?使用訂單號碼
+            # 訂單號碼
             params['Data_id']
           end
 
           def transaction_id
+            # Smile Pay 端訂單號碼
             params['Smseid']
           end
 
@@ -40,7 +41,7 @@ module ActiveMerchant #:nodoc:
 
           # the money amount we received in X.2 decimal.
           def gross
-            Money.new(params['Amount'].to_i, currency)
+            ::Money.new(params['Amount'].to_i * 100, currency)
           end
 
           # Was this a test transaction?
@@ -72,7 +73,7 @@ module ActiveMerchant #:nodoc:
           private
 
           def calculated_mid_smile_key(key)
-            b = "%08d" % (gross().to_f * 100).to_i
+            b = "%08d" % (gross().dollars).to_i
             c = params['Smseid'][-4..-1].gsub(/\D/,'9')
             d = ( key + b + c ).chars.to_a
 
