@@ -7,7 +7,7 @@
 Add this line to your application's Gemfile:
 
     gem 'activemerchant'
-    gem 'active_merchant-smile_pay'
+    gem 'active_merchant-smile_pay', github:'GoodLife/active_merchant-smile_pay'
 
 And then execute:
 
