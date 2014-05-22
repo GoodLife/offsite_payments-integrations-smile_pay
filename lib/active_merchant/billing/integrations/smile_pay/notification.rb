@@ -67,8 +67,12 @@ module ActiveMerchant #:nodoc:
           # SmilePay 沒有遠端驗證功能，
           # 而以認證碼代替
           def acknowledge
-            # TODO 使用查詢功能實作 acknowledge
-            params[:Mid_smilepay].to_i == calculated_mid_smile_key
+            if test? # SmilePay 客服回答測試環境時認證碼只會傳0
+              true
+            else
+              # TODO 使用查詢功能實作 acknowledge
+              params[:Mid_smilepay].to_i == calculated_mid_smile_key
+            end
           end
 
           private
