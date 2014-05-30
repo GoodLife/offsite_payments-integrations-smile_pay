@@ -11,7 +11,7 @@ module ActiveMerchant #:nodoc:
           end
 
           # 商家代號
-          mapping :account, 'Ddvc'
+          mapping :account, 'Dcvc'
           # 金額
           mapping :amount, 'Amount'
           # 訂單號碼

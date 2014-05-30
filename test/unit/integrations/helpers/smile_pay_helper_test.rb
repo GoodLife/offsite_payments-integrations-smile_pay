@@ -8,7 +8,7 @@ class SmilePayHelperTest < Test::Unit::TestCase
   end
 
   def test_basic_helper_fields
-    assert_field 'Ddvc', '0000'
+    assert_field 'Dcvc', '0000'
 
     assert_field 'Amount', '500'
     assert_field 'Data_id', 'order-500'
