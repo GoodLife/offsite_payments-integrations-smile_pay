@@ -71,7 +71,7 @@ module ActiveMerchant #:nodoc:
               true
             else
               # TODO 使用查詢功能實作 acknowledge
-              params[:Mid_smilepay].to_i == calculated_mid_smile_key
+              params['Mid_smilepay'].to_i == calculated_mid_smile_key
             end
           end
 

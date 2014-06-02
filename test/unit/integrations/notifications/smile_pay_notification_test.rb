@@ -25,7 +25,9 @@ class SmilePayNotificationTest < Test::Unit::TestCase
 
   # Replace with real successful acknowledgement code
   def test_acknowledgement
-
+    ActiveMerchant::Billing::Base.integration_mode = :production
+    assert @smile_pay.acknowledge
+    ActiveMerchant::Billing::Base.integration_mode = :test
   end
 
   def test_send_acknowledgement
@@ -48,6 +50,7 @@ class SmilePayNotificationTest < Test::Unit::TestCase
       Moneytype=TW
       Process_date=20130310
       Process_time=140000
+      Mid_smilepay=213
     }.join('&')
   end
 end
