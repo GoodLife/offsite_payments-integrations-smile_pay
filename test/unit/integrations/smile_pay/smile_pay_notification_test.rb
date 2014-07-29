@@ -1,7 +1,7 @@
 require 'test_helper'
 
 class SmilePayNotificationTest < Test::Unit::TestCase
-  include ActiveMerchant::Billing::Integrations
+  include OffsitePayments::Integrations
 
   def setup
     @smile_pay = SmilePay::Notification.new(http_raw_data)
@@ -25,9 +25,9 @@ class SmilePayNotificationTest < Test::Unit::TestCase
 
   # Replace with real successful acknowledgement code
   def test_acknowledgement
-    ActiveMerchant::Billing::Base.integration_mode = :production
+    OffsitePayments.mode = :production
     assert @smile_pay.acknowledge
-    ActiveMerchant::Billing::Base.integration_mode = :test
+    OffsitePayments.mode = :test
   end
 
   def test_send_acknowledgement

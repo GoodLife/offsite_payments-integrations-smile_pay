@@ -1,7 +1,8 @@
 require 'test_helper'
 
 class SmilePayHelperTest < Test::Unit::TestCase
-  include ActiveMerchant::Billing::Integrations
+  include OffsitePayments::Integrations
+  include OffsitePayments::Assertions
 
   def setup
     @helper = SmilePay::Helper.new('order-500','0000', :amount => 500, :currency => 'TWD')

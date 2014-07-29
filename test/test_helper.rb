@@ -9,14 +9,48 @@ rescue LoadError => e
   puts "Error loading bundler (#{e.message}): \"gem install bundler\" for bundler support."
 end
 
-require 'active_merchant/smile_pay'
-
 require 'test/unit'
+
 require 'money'
+require 'mocha/version'
+if(Mocha::VERSION.split(".")[1].to_i < 12)
+  require 'mocha'
+else
+  require 'mocha/setup'
+end
+require 'yaml'
+require 'json'
 
-ActiveMerchant::Billing::Base.mode = :test
+require 'active_support/core_ext/integer/time'
+require 'active_support/core_ext/numeric/time'
 
-module ActiveMerchant
+begin
+  require 'active_support/core_ext/time/acts_like'
+rescue LoadError
+end
+
+begin
+  gem 'actionpack'
+rescue LoadError
+  raise StandardError, "The view tests need ActionPack installed as gem to run"
+end
+
+require 'action_controller'
+#require "action_view/template"
+begin
+  require 'active_support/core_ext/module/deprecation'
+  require 'action_dispatch/testing/test_process'
+rescue LoadError
+  require 'action_controller/test_process'
+end
+
+require 'offsite_payments'
+require 'offsite_payments/action_view_helper'
+require 'offsite_payments/integrations/smile_pay'
+
+OffsitePayments.mode = :test
+
+module OffsitePayments
   module Assertions
     AssertionClass = Test::Unit::AssertionFailedError
 
@@ -26,7 +60,7 @@ module ActiveMerchant
       end
     end
 
-    # Allows the testing of you to check for negative assertions:
+    # Allows testing of negative assertions:
     #
     #   # Instead of
     #   assert !something_that_is_false
@@ -45,48 +79,61 @@ module ActiveMerchant
       end
     end
 
-    # A handy little assertion to check for a successful response:
+    # An assertion of a successful response:
     #
     #   # Instead of
-    #   assert_success response
+    #   assert response.success?
     #
     #   # DRY that up with
     #   assert_success response
     #
     # A message will automatically show the inspection of the response
     # object if things go afoul.
-    def assert_success(response)
+    def assert_success(response, message=nil)
       clean_backtrace do
-        assert response.success?, "Response failed: #{response.inspect}"
+        assert response.success?, build_message(nil, "#{message + "\n" if message}Response expected to succeed: <?>", response)
       end
     end
 
     # The negative of +assert_success+
-    def assert_failure(response)
+    def assert_failure(response, message=nil)
       clean_backtrace do
-        assert_false response.success?, "Response expected to fail: #{response.inspect}"
+        assert !response.success?, build_message(nil, "#{message + "\n" if message}Response expected to fail: <?>", response)
       end
     end
 
-    def assert_valid(validateable)
+    def assert_valid(model)
+      errors = model.validate
+
       clean_backtrace do
-        assert validateable.valid?, "Expected to be valid"
+        assert_equal({}, errors, "Expected to be valid")
       end
+
+      errors
     end
 
-    def assert_not_valid(validateable)
+    def assert_not_valid(model)
+      errors = model.validate
+
       clean_backtrace do
-        assert_false validateable.valid?, "Expected to not be valid"
+        assert_not_equal({}, errors, "Expected to not be valid")
       end
+
+      errors
     end
 
-    def assert_deprecation_warning(message, target)
-      target.expects(:deprecated).with(message)
+    def assert_deprecation_warning(message)
+      OffsitePayments.expects(:deprecated).with(message)
       yield
     end
 
-    def assert_no_deprecation_warning(target)
-      target.expects(:deprecated).never
+    def silence_deprecation_warnings
+      OffsitePayments.stubs(:deprecated)
+      yield
+    end
+
+    def assert_no_deprecation_warning
+      OffsitePayments.expects(:deprecated).never
       yield
     end
 
@@ -98,8 +145,59 @@ module ActiveMerchant
       raise AssertionClass, e.message, e.backtrace.reject { |line| File.expand_path(line) =~ /#{path}/ }
     end
   end
+
+  module Fixtures
+    HOME_DIR = RUBY_PLATFORM =~ /mswin32/ ? ENV['HOMEPATH'] : ENV['HOME'] unless defined?(HOME_DIR)
+    LOCAL_CREDENTIALS = File.join(HOME_DIR.to_s, '.active_merchant/fixtures.yml') unless defined?(LOCAL_CREDENTIALS)
+    DEFAULT_CREDENTIALS = File.join(File.dirname(__FILE__), 'fixtures.yml') unless defined?(DEFAULT_CREDENTIALS)
+
+    private
+
+    def address(options = {})
+      {
+        :name     => 'Jim Smith',
+        :address1 => '1234 My Street',
+        :address2 => 'Apt 1',
+        :company  => 'Widgets Inc',
+        :city     => 'Ottawa',
+        :state    => 'ON',
+        :zip      => 'K1C2N6',
+        :country  => 'CA',
+        :phone    => '(555)555-5555',
+        :fax      => '(555)555-6666'
+      }.update(options)
+    end
+
+    def generate_unique_id
+      SecureRandom.hex(16)
+    end
+
+    def all_fixtures
+      @@fixtures ||= load_fixtures
+    end
+
+    def fixtures(key)
+      data = all_fixtures[key] || raise(StandardError, "No fixture data was found for '#{key}'")
+
+      data.dup
+    end
+
+    def load_fixtures
+      [DEFAULT_CREDENTIALS, LOCAL_CREDENTIALS].inject({}) do |credentials, file_name|
+        if File.exists?(file_name)
+          yaml_data = YAML.load(File.read(file_name))
+          credentials.merge!(symbolize_keys(yaml_data))
+        end
+        credentials
+      end
+    end
+
+    def symbolize_keys(hash)
+      return unless hash.is_a?(Hash)
+
+      hash.symbolize_keys!
+      hash.each{|k,v| symbolize_keys(v)}
+    end
+  end
 end
 
-Test::Unit::TestCase.class_eval do
-  include ActiveMerchant::Assertions
-end
