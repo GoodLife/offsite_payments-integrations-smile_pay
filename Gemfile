@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in active_merchant-smile_pay.gemspec
+# Specify your gem's dependencies in .gemspec file
 gemspec

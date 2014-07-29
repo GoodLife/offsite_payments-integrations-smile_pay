@@ -1,21 +1,21 @@
-# ActiveMerchant::SmilePay
+# OffsitePayments::SmilePay
 
-實作 ActiveMerchant Integrations 介面串接 SmilePay 訊航科技的金流服務。這是非官方實作。
+實作 OffsitePayments Integrations 介面串接 SmilePay 訊航科技的金流服務。這是非官方實作。
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'activemerchant'
-    gem 'active_merchant-smile_pay', github:'GoodLife/active_merchant-smile_pay'
+    gem 'offsite_payments'
+    gem 'offsite_payments-integrations-smile_pay', github:'GoodLife/offsite_payments-integrations-smile_pay'
 
 And then execute:
 
-    $ bundle
+    $ bundle install
 
 ## Usage
 
-本實作為 ActiveMerchant 的 off-site payment gateway ，也稱為 ActiveMerchant Integrations。這主要是指使用者瀏覽器需要跳轉到第三方金流服務的網站下的付款形式。
+本實作 OffsitePayments 介面，使用者瀏覽器需在金流提供業者的網站下付款。
 
 ## Contributing
 
