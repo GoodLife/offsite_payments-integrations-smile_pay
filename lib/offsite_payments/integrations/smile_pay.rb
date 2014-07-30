@@ -104,10 +104,14 @@ module OffsitePayments #:nodoc:
       class Notification < OffsitePayments::Notification
         attr_accessor :custom_user_confirmation_param #商家認證參數
 
-        # TODO credit card
         def complete?
-          # No status except for credit card
-          true
+          if ['A','D'].include?(params['Classif'])
+            # Credit Card
+            return params['Response_id'] == '1'
+          else
+            # No status except for non credit card payments
+            true
+          end
         end
 
         def item_id
@@ -149,7 +153,7 @@ module OffsitePayments #:nodoc:
         end
 
         def status
-          'Completed'
+          params['Response_msg'] || 'Completed'
         end
 
         def currency
